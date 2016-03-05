@@ -6,6 +6,8 @@ Language: C#
 
 Current state: Unfinished, unoptimized (first) version; semi-operational.
 
+License: MIT.
+
 To-Do:
 - [ ] Finish implementing, and optimize it.
 - [ ] Implement in Java.
