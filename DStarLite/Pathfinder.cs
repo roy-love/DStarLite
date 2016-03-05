@@ -117,6 +117,7 @@ namespace DStarLite
             {
                 steps++;
                 StateInfo topInfo = S2[topState];
+                U.Remove(topState);
                 if (topInfo.g > topInfo.rhs)
                 {
                     topInfo.g = topInfo.rhs;
@@ -126,17 +127,16 @@ namespace DStarLite
                     {
                         updateVertex(s);
                     }
-                    updateVertex(topState);
                 }
                 else
                 {
-                    topInfo.g = double.PositiveInfinity;
-                    updateVertex(topState);
+                    topInfo.g = double.PositiveInfinity;                    
                     List<State> tempList = Pred(topState);
                     foreach (State s in tempList)
                     {
                         updateVertex(s);
                     }
+                    updateVertex(topState);
                 }
             }
         }
