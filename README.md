@@ -4,11 +4,13 @@ D*Lite, as explained in [this paper](http://pub1.willowgarage.com/~konolige/cs22
 
 Language: C#
 
-Current state: Unfinished, unoptimized (first) version; semi-operational.
+Current state: Unoptimized (first) version, operational.
 
 License: MIT.
 
 To-Do:
-- [ ] Finish implementing, and optimize it.
+- [x] Finish implementing.
+- [ ] Implement the second optimized version.
+- [ ] Comment.
 - [ ] Implement in Java.
 - [ ] More information to be revealed later.
