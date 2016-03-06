@@ -4,12 +4,12 @@ D*Lite, as explained in [this paper](http://pub1.willowgarage.com/~konolige/cs22
 
 Language: C#
 
-Current state: Second version, semi-operational, finding the shortest path works, replanning doesn't.
+Current state: Second version, Operational.
 
 License: MIT.
 
 To-Do:
-- [ ] Finish implementing.
+- [x] Finish implementing.
 - [ ] Implement priority queue.
 - [ ] Refactor.
 - [ ] Comment.
