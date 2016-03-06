@@ -83,8 +83,8 @@ namespace DStarLite
             k_m = 0;
             foreach (var s in S)
             {
-                s.Value.rhs = double.PositiveInfinity;
-                s.Value.g = double.PositiveInfinity;
+                s.Value.rhs = s.Value.g = double.PositiveInfinity;
+                //s.Value.g = double.PositiveInfinity;
             }
             StateInfo gInfo = S[goal];
             gInfo.rhs = 0;
