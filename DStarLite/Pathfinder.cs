@@ -8,15 +8,16 @@ namespace DStarLite
 {
     class Pathfinder
     {
-        List<State> S = new List<State>();
         List<State> U = new List<State>();
-        Dictionary<State, StateInfo> S2 = new Dictionary<State, StateInfo>();
+        Dictionary<State, StateInfo> S = new Dictionary<State, StateInfo>();
         State start;
         State goal;
         State topState;
-        int k_m = 0;
+        double k_m = 0;
         int maxsteps = 8000;
-        List<State> changed = new List<State>();
+        int steps = 0;
+        bool change = false;
+        State changed;
         double m_sqrt2 = Math.Sqrt(2.0);
         int[,] directions = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 } };
 
@@ -26,7 +27,7 @@ namespace DStarLite
             {
                 for (int j = 0; j < y; j++)
                 {
-                    S2.Add(new State(i, j), new StateInfo());
+                    S.Add(new State(i, j), new StateInfo());
                 }
             }
         }
@@ -34,7 +35,7 @@ namespace DStarLite
         public void setStart(int x, int y)
         {
             State temp = new State(x, y);
-            if (S2.ContainsKey(temp))
+            if (S.ContainsKey(temp))
             {
                 start = temp;
             }
@@ -43,7 +44,7 @@ namespace DStarLite
         public void setGoal(int x, int y)
         {
             State temp = new State(x, y);
-            if (S2.ContainsKey(temp))
+            if (S.ContainsKey(temp))
             {
                 goal = temp;
             }
@@ -52,20 +53,21 @@ namespace DStarLite
         public void updateCost(int x, int y, double cost)
         {
             State temp = new State(x, y);
-            if (S2.ContainsKey(temp))
+            if (S.ContainsKey(temp))
             {
                 temp.cost = cost;
                 StateInfo tempInfo = new StateInfo();
-                S2.Remove(temp);
-                S2.Add(temp, tempInfo);
-                changed.Add(temp);
+                S.Remove(temp);
+                S.Add(temp, tempInfo);
+                changed = temp;
+                change = true;
             }
         }
 
         public double[] calcKeys(State s)
         {
             double[] temp = new double[2];
-            StateInfo sInfo = S2[s];
+            StateInfo sInfo = S[s];
             temp[0] = Math.Min(sInfo.g, sInfo.rhs) + heuristics(start, s) + k_m;
             temp[1] = Math.Min(sInfo.g, sInfo.rhs);
             return temp;
@@ -75,97 +77,112 @@ namespace DStarLite
         {
             U.Clear();
             k_m = 0;
-            foreach (var s in S2)
+            foreach (var s in S)
             {
                 s.Value.rhs = double.PositiveInfinity;
                 s.Value.g = double.PositiveInfinity;
             }
-            StateInfo gInfo = S2[goal];
+            StateInfo gInfo = S[goal];
             gInfo.rhs = 0;
             gInfo.keys[0] = heuristics(start, goal);
             gInfo.keys[1] = 0;
             U.Add(goal);
+            steps = 0;
 
         }
 
         public void updateVertex(State u)
         {
-            StateInfo uInfo = S2[u];
-            if (u != start)
+            StateInfo uInfo = S[u];
+            if(uInfo.g != uInfo.rhs && U.Contains(u))
             {
-                List<State> tempList = Succ(u);
-                if (tempList.Any())
-                {
-                    State smallest = tempList[0];
-                    StateInfo smallInfo = S2[smallest];
-                    foreach (State s in tempList)
-                    {
-                        StateInfo sInfo = S2[s];
-                        if (cost(s, u) + sInfo.g < cost(smallest, u) + smallInfo.g)
-                        {
-                            smallest = s;
-                            smallInfo = sInfo;
-                        }
-                    }
-                    uInfo.rhs = smallInfo.g + cost(u, smallest);
-                }
-
+                uInfo.keys = calcKeys(u);
             }
-            if (U.Contains(u))
+            else if (uInfo.g != uInfo.rhs && !U.Contains(u))
+            {
+                uInfo.keys = calcKeys(u);
+                U.Add(u);
+            }
+            else if (uInfo.g != uInfo.rhs && U.Contains(u))
             {
                 U.Remove(u);
-            }
-            if (uInfo.g != uInfo.rhs)
-            {
-                U.Add(u);
-                double[] keys = calcKeys(u);
-                uInfo.keys[0] = keys[0];
-                uInfo.keys[1] = keys[1];
             }
         }
 
         public void computerShotestPath()
         {
-            StateInfo sInfo = S2[start];
-            int steps = 0;
+            StateInfo sInfo = S[start];
+            
             while ((U.Any() && keyLessThan(top(), start) || sInfo.rhs != sInfo.g) && steps < maxsteps)
             {
                 steps++;
-                StateInfo topInfo = S2[topState];
-                U.Remove(topState);
-                
-                if (topInfo.g > topInfo.rhs)
+                StateInfo topInfo = S[topState];                
+                double[] k_old = topInfo.keys;
+                double[] k_new = calcKeys(topState);
+                if (keyLessThan(k_old, k_new))
+                {
+                    topInfo.keys = k_new;
+                }
+                else if (topInfo.g > topInfo.rhs)
                 {
                     topInfo.g = topInfo.rhs;
-
+                    U.Remove(topState);
                     List<State> tempList = Pred(topState);
                     foreach (State s in tempList)
                     {
+                        StateInfo info = S[s];
+                        info.rhs = Math.Min(info.rhs, cost(s, topState)+topInfo.g);
                         updateVertex(s);
                     }
                 }
                 else
                 {
-                    topInfo.g = double.PositiveInfinity;                    
+                    double g_old = topInfo.g;
+                    topInfo.g = double.PositiveInfinity;
                     List<State> tempList = Pred(topState);
+                    tempList.Add(topState);
                     foreach (State s in tempList)
                     {
+                        StateInfo info = S[s];
+                        if (info.rhs == cost(s, topState) + g_old)
+                        {
+                            if(topState.x != goal.x && topState.y != goal.y)
+                            {
+                                List<State> list = Succ(s);
+                                if (tempList.Any())
+                                {
+                                    State smallest = tempList[0];
+                                    StateInfo smallInfo = S[smallest];
+                                    foreach (State ss in tempList)
+                                    {
+                                        StateInfo ssInfo = S[ss];
+                                        if (cost(s, ss) + ssInfo.g < cost(s, smallest) + smallInfo.g)
+                                        {
+                                            smallest = ss;
+                                            smallInfo = ssInfo;
+                                        }
+                                    }
+                                    info.rhs = smallInfo.g + cost(s, smallest);
+                                }
+                            }
+                        }
                         updateVertex(s);
                     }
-                    updateVertex(topState);
                 }
             }
         }
 
         public void main()
         {
+            State last = start;
             initialize();
             computerShotestPath();
+            int h = 0;
             Console.WriteLine(start.x + " " + start.y);
             while (start.x != goal.x && start.y != goal.y)
             {
-                StateInfo startInfo = S2[start];
-                if(startInfo.g == double.PositiveInfinity)
+                StateInfo startInfo = S[start];
+                if (startInfo.g == double.PositiveInfinity)
                 {
                     Console.WriteLine("No path found.");
                     return;
@@ -174,10 +191,10 @@ namespace DStarLite
                 if (tempList.Any())
                 {
                     State smallest = tempList[0];
-                    StateInfo smallInfo = S2[smallest];
+                    StateInfo smallInfo = S[smallest];
                     foreach (State s in tempList)
                     {
-                        StateInfo sInfo = S2[s];
+                        StateInfo sInfo = S[s];
                         if (cost(start, s) + sInfo.g < cost(start, smallest) + smallInfo.g)
                         {
                             smallest = s;
@@ -186,29 +203,31 @@ namespace DStarLite
                     }
                     start = smallest;
                 }
-                if (changed.Any()) 
+                Console.WriteLine(start.x + " " + start.y);
+                
+                if (h == 1)
                 {
-                    foreach(State s in changed)
-                    {
-                        updateVertex(s);
-                    }
-                    foreach(State s in U)
-                    {
-                        StateInfo sInfo = S2[s];
-                        sInfo.keys = calcKeys(s);
-                    }
+                    updateCost(2, 2, double.PositiveInfinity);
+                    h++;
+                }
+                if (change)
+                {
+                    k_m = k_m + heuristics(last, start);
+                    last = start;
+                    changeNeighbors();                    
+                    change = false;
                     computerShotestPath();
                 }
-                
-                Console.WriteLine(start.x + " " + start.y);
+
+
             }
 
         }
 
         bool keyLessThan(State a, State b)
         {
-            StateInfo aInfo = S2[a];
-            StateInfo bInfo = S2[b];
+            StateInfo aInfo = S[a];
+            StateInfo bInfo = S[b];
 
             if (aInfo.keys[0] < bInfo.keys[0])
             {
@@ -279,15 +298,15 @@ namespace DStarLite
         List<State> Pred(State s)
         {
             List<State> tempList = new List<State>();
-            StateInfo sInfo = S2[s];
+            StateInfo sInfo = S[s];
             StateInfo tInfo;
             for (int i = 0; i < 8; i++)
             {
                 State temp = new State(s.x + directions[i, 0], s.y + directions[i, 1]);
 
-                if (S2.ContainsKey(temp))
+                if (S.ContainsKey(temp))
                 {
-                    tInfo = S2[temp];
+                    tInfo = S[temp];
                     if (tInfo.rhs > sInfo.rhs)
                     {
                         tempList.Add(temp);
@@ -300,15 +319,15 @@ namespace DStarLite
         List<State> Succ(State s)
         {
             List<State> tempList = new List<State>();
-            StateInfo sInfo = S2[s];
+            StateInfo sInfo = S[s];
             StateInfo tInfo;
             for (int i = 0; i < 8; i++)
             {
                 State temp = new State(s.x + directions[i, 0], s.y + directions[i, 1]);
 
-                if (S2.ContainsKey(temp))
+                if (S.ContainsKey(temp))
                 {
-                    tInfo = S2[temp];
+                    tInfo = S[temp];
                     if (tInfo.g < sInfo.g)
                     {
                         tempList.Add(temp);
@@ -317,6 +336,20 @@ namespace DStarLite
                 }
             }
             return tempList;
+        }
+
+        public void changeNeighbors()
+        {
+            StateInfo sInfo = S[changed];
+            for (int i = 0; i < 8; i++)
+            {
+                State temp = new State(changed.x + directions[i, 0], changed.y + directions[i, 1]);
+
+                if (S.ContainsKey(temp))
+                {
+                        updateVertex(temp);
+                }
+            }
         }
 
         double cost(State a, State b)
