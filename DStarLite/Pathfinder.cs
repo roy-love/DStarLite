@@ -218,7 +218,7 @@ namespace DStarLite
                 // For simulation and testing.
                 if (h == 0)
                 {
-                    updateCost(2, 2, 0);
+                    updateCost(2, 2, 3);
                     h++;
                 }
                 if (change)
@@ -240,11 +240,11 @@ namespace DStarLite
 
                         if (c_old > c_new)
                         {
-                            info.rhs = Math.Min(info.rhs, c_new + info.g);
+                            info.rhs = Math.Min(info.rhs, c_new + changedInfo.g);
                         }
-                        else if (info.rhs == c_old + info.g)
+                        else if (info.rhs == c_old + changedInfo.g)
                         {
-                            if (changed.x != goal.x && changed.y != goal.y)
+                            if (s.x != goal.x && s.y != goal.y)
                             {
                                 List<State> list2 = Succ(s);
                                 if (list2.Any())
