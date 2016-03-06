@@ -4,13 +4,13 @@ D*Lite, as explained in [this paper](http://pub1.willowgarage.com/~konolige/cs22
 
 Language: C#
 
-Current state: Unoptimized (first) version, operational.
+Current state: Second version, semi-operational, finding the shortest path works, replanning doesn't.
 
 License: MIT.
 
 To-Do:
-- [x] Finish implementing.
-- [ ] Implement the second optimized version.
+- [ ] Finish implementing.
+- [ ] Implement priority queue.
+- [ ] Refactor.
 - [ ] Comment.
 - [ ] Implement in Python.
-- [ ] More information to be revealed later.
