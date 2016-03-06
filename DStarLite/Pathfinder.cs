@@ -52,7 +52,7 @@ namespace DStarLite
         {
             double[] temp = new double[2];
             StateInfo sInfo = S2[s];
-            temp[0] = Math.Min(sInfo.g, sInfo.rhs) + heuristics(start, s);
+            temp[0] = Math.Min(sInfo.g, sInfo.rhs) + heuristics(start, s) + k_m;
             temp[1] = Math.Min(sInfo.g, sInfo.rhs);
             return temp;
         }
@@ -60,6 +60,7 @@ namespace DStarLite
         public void initialize()
         {
             U.Clear();
+            k_m = 0;
             foreach (var s in S2)
             {
                 s.Value.rhs = double.PositiveInfinity;
@@ -67,8 +68,8 @@ namespace DStarLite
             }
             StateInfo gInfo = S2[goal];
             gInfo.rhs = 0;
-            gInfo.key_0 = heuristics(start, goal);
-            gInfo.key_1 = 0;
+            gInfo.keys[0] = heuristics(start, goal);
+            gInfo.keys[1] = 0;
             U.Add(goal);
 
         }
@@ -104,8 +105,8 @@ namespace DStarLite
             {
                 U.Add(u);
                 double[] keys = calcKeys(u);
-                uInfo.key_0 = keys[0];
-                uInfo.key_1 = keys[1];
+                uInfo.keys[0] = keys[0];
+                uInfo.keys[1] = keys[1];
             }
         }
 
@@ -118,6 +119,7 @@ namespace DStarLite
                 steps++;
                 StateInfo topInfo = S2[topState];
                 U.Remove(topState);
+                
                 if (topInfo.g > topInfo.rhs)
                 {
                     topInfo.g = topInfo.rhs;
@@ -145,6 +147,28 @@ namespace DStarLite
         {
             initialize();
             computerShotestPath();
+            Console.WriteLine(start.x + " " + start.y);
+            while (start.x != goal.x && start.y != goal.y)
+            {
+                List<State> tempList = Succ(start);
+                if (tempList.Any())
+                {
+                    State smallest = tempList[0];
+                    StateInfo smallInfo = S2[smallest];
+                    foreach (State s in tempList)
+                    {
+                        StateInfo sInfo = S2[s];
+                        if (cost(start, s) + sInfo.g < cost(start, smallest) + smallInfo.g)
+                        {
+                            smallest = s;
+                            smallInfo = sInfo;
+                        }
+                    }
+                    start = smallest;
+                }
+                
+                Console.WriteLine(start.x + " " + start.y);
+            }
 
         }
 
@@ -153,13 +177,30 @@ namespace DStarLite
             StateInfo aInfo = S2[a];
             StateInfo bInfo = S2[b];
 
-            if (aInfo.key_0 < bInfo.key_0)
+            if (aInfo.keys[0] < bInfo.keys[0])
             {
                 return true;
             }
-            if (aInfo.key_0 == bInfo.key_0)
+            if (aInfo.keys[0] == bInfo.keys[0])
             {
-                if (aInfo.key_1 < bInfo.key_1)
+                if (aInfo.keys[1] < bInfo.keys[1])
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool keyLessThan(double[] keyA, double[] keyB)
+        {
+            if (keyA[0] < keyB[0])
+            {
+                return true;
+            }
+            if (keyA[0] == keyB[0])
+            {
+                if (keyA[1] < keyB[1])
                 {
                     return true;
                 }
