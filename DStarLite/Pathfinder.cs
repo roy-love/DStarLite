@@ -181,7 +181,7 @@ namespace DStarLite
             }
         }
         /// <summary>
-        /// Not finished.
+        /// You guessed it, in the paper.
         /// </summary>
         public void main()
         {
