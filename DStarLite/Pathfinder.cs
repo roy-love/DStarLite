@@ -12,7 +12,7 @@ namespace DStarLite
         Dictionary<State, StateInfo> S = new Dictionary<State, StateInfo>();
         State start;
         State goal;
-        State topState;
+        State u;
         double k_m = 0;
         int maxsteps = 8000;
         int steps = 0;
@@ -63,7 +63,11 @@ namespace DStarLite
                 change = true;
             }
         }
-
+        /// <summary>
+        /// As shown in the paper.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public double[] calcKeys(State s)
         {
             double[] temp = new double[2];
@@ -72,7 +76,9 @@ namespace DStarLite
             temp[1] = Math.Min(sInfo.g, sInfo.rhs);
             return temp;
         }
-
+        /// <summary>
+        /// As shown in the paper.
+        /// </summary>
         public void initialize()
         {
             U.Clear();
@@ -90,7 +96,10 @@ namespace DStarLite
             steps = 0;
 
         }
-
+        /// <summary>
+        /// As shown in the paper.
+        /// </summary>
+        /// <param name="u"></param>
         public void updateVertex(State u)
         {
             StateInfo uInfo = S[u];
@@ -108,7 +117,9 @@ namespace DStarLite
                 U.Remove(u);
             }
         }
-
+        /// <summary>
+        /// As shown in the paper.
+        /// </summary>
         public void computerShotestPath()
         {
             StateInfo sInfo = S[start];
@@ -116,37 +127,37 @@ namespace DStarLite
             while ((U.Any() && keyLessThan(top(), start) || sInfo.rhs != sInfo.g) && steps < maxsteps)
             {
                 steps++;
-                StateInfo topInfo = S[topState];                
-                double[] k_old = topInfo.keys;
-                double[] k_new = calcKeys(topState);
+                StateInfo uInfo = S[u];                
+                double[] k_old = uInfo.keys;
+                double[] k_new = calcKeys(u);
                 if (keyLessThan(k_old, k_new))
                 {
-                    topInfo.keys = k_new;
+                    uInfo.keys = k_new;
                 }
-                else if (topInfo.g > topInfo.rhs)
+                else if (uInfo.g > uInfo.rhs)
                 {
-                    topInfo.g = topInfo.rhs;
-                    U.Remove(topState);
-                    List<State> tempList = Pred(topState);
+                    uInfo.g = uInfo.rhs;
+                    U.Remove(u);
+                    List<State> tempList = Pred(u);
                     foreach (State s in tempList)
                     {
                         StateInfo info = S[s];
-                        info.rhs = Math.Min(info.rhs, cost(s, topState)+topInfo.g);
+                        info.rhs = Math.Min(info.rhs, cost(s, u)+uInfo.g);
                         updateVertex(s);
                     }
                 }
                 else
                 {
-                    double g_old = topInfo.g;
-                    topInfo.g = double.PositiveInfinity;
-                    List<State> tempList = Pred(topState);
-                    tempList.Add(topState);
+                    double g_old = uInfo.g;
+                    uInfo.g = double.PositiveInfinity;
+                    List<State> tempList = Pred(u);
+                    tempList.Add(u);
                     foreach (State s in tempList)
                     {
                         StateInfo info = S[s];
-                        if (info.rhs == cost(s, topState) + g_old)
+                        if (info.rhs == cost(s, u) + g_old)
                         {
-                            if(topState.x != goal.x && topState.y != goal.y)
+                            if(u.x != goal.x && u.y != goal.y)
                             {
                                 List<State> list = Succ(s);
                                 if (tempList.Any())
@@ -171,7 +182,9 @@ namespace DStarLite
                 }
             }
         }
-
+        /// <summary>
+        /// Not finished.
+        /// </summary>
         public void main()
         {
             State last = start;
@@ -204,7 +217,7 @@ namespace DStarLite
                     start = smallest;
                 }
                 Console.WriteLine(start.x + " " + start.y);
-                
+                // For simulation and testing.
                 if (h == 1)
                 {
                     updateCost(2, 2, double.PositiveInfinity);
@@ -223,7 +236,12 @@ namespace DStarLite
             }
 
         }
-
+        /// <summary>
+        /// If you know A*, it shouldn't be a very big leap to understand what's going on here.
+        /// </summary>
+        /// <param name="a"> The first state.</param>
+        /// <param name="b"> The second state.</param>
+        /// <returns></returns>
         bool keyLessThan(State a, State b)
         {
             StateInfo aInfo = S[a];
@@ -243,7 +261,12 @@ namespace DStarLite
 
             return false;
         }
-
+        /// <summary>
+        /// Same as the above, but with keys instead of states.
+        /// </summary>
+        /// <param name="keyA">First pair.</param>
+        /// <param name="keyB">Second pair.</param>
+        /// <returns></returns>
         bool keyLessThan(double[] keyA, double[] keyB)
         {
             if (keyA[0] < keyB[0])
@@ -280,7 +303,10 @@ namespace DStarLite
             }
             return ((m_sqrt2 - 1.0) * min + max);
         }
-
+        /// <summary>
+        /// Gets the state with the highest priority ('till I implement an actual priority queue).
+        /// </summary>
+        /// <returns>State, highest priority in U.</returns>
         State top()
         {
             State temp = U[0];
@@ -291,10 +317,14 @@ namespace DStarLite
                     temp = s;
                 }
             }
-            topState = temp;
+            u = temp;
             return temp;
         }
-
+        /// <summary>
+        /// Gets the predecessors of a state s.
+        /// </summary>
+        /// <param name="s">The state.</param>
+        /// <returns>A list of predecessors, may be empty.</returns>
         List<State> Pred(State s)
         {
             List<State> tempList = new List<State>();
@@ -316,6 +346,11 @@ namespace DStarLite
             }
             return tempList;
         }
+        /// <summary>
+        /// Gets the successors of a state s.
+        /// </summary>
+        /// <param name="s">The state.</param>
+        /// <returns>A list of successors, may be empty.</returns>
         List<State> Succ(State s)
         {
             List<State> tempList = new List<State>();
@@ -337,7 +372,9 @@ namespace DStarLite
             }
             return tempList;
         }
-
+        /// <summary>
+        /// WIP
+        /// </summary>
         public void changeNeighbors()
         {
             StateInfo sInfo = S[changed];
@@ -352,6 +389,12 @@ namespace DStarLite
             }
         }
 
+        /// <summary>
+        /// Gets the cost of traversal from one state to another adjacent state.
+        /// </summary>
+        /// <param name="a">First state.</param>
+        /// <param name="b">Second state.</param>
+        /// <returns>The cost, double.</returns>
         double cost(State a, State b)
         {
             return Math.Max(a.cost, b.cost);
