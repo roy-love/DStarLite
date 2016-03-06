@@ -9,7 +9,7 @@ Current state: Unfinished, unoptimized (first) version; semi-operational.
 License: MIT.
 
 To-Do:
-- [ ] Finish implementing.
+- [x] Finish implementing.
 - [ ] Implement the second optimized version.
 - [ ] Comment.
 - [ ] Implement in Java.
