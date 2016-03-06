@@ -11,5 +11,7 @@ namespace DStarLite
         public double[] keys = { double.PositiveInfinity, double.PositiveInfinity };
         public double g = double.PositiveInfinity;
         public double rhs = double.PositiveInfinity;
+        public double cost = 1;
+        public double cost_new;
     }
 }

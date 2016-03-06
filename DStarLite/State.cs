@@ -10,7 +10,7 @@ namespace DStarLite
     {
         public int x;
         public int y;
-        public double cost = 1;
+        
         /// <summary>
         /// The state is a combination of this class and StateInfo.
         /// </summary>

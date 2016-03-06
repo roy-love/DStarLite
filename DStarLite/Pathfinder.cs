@@ -52,14 +52,12 @@ namespace DStarLite
 
         public void updateCost(int x, int y, double cost)
         {
-            State temp = new State(x, y);
-            if (S.ContainsKey(temp))
+            changed = new State(x, y);
+
+            if (S.ContainsKey(changed))
             {
-                temp.cost = cost;
-                StateInfo tempInfo = new StateInfo();
-                S.Remove(temp);
-                S.Add(temp, tempInfo);
-                changed = temp;
+                StateInfo cInfo = S[changed];
+                cInfo.cost_new = cost;
                 change = true;
             }
         }
@@ -103,7 +101,7 @@ namespace DStarLite
         public void updateVertex(State u)
         {
             StateInfo uInfo = S[u];
-            if(uInfo.g != uInfo.rhs && U.Contains(u))
+            if (uInfo.g != uInfo.rhs && U.Contains(u))
             {
                 uInfo.keys = calcKeys(u);
             }
@@ -123,11 +121,11 @@ namespace DStarLite
         public void computerShotestPath()
         {
             StateInfo sInfo = S[start];
-            
+
             while ((U.Any() && keyLessThan(top(), start) || sInfo.rhs != sInfo.g) && steps < maxsteps)
             {
                 steps++;
-                StateInfo uInfo = S[u];                
+                StateInfo uInfo = S[u];
                 double[] k_old = uInfo.keys;
                 double[] k_new = calcKeys(u);
                 if (keyLessThan(k_old, k_new))
@@ -142,7 +140,7 @@ namespace DStarLite
                     foreach (State s in tempList)
                     {
                         StateInfo info = S[s];
-                        info.rhs = Math.Min(info.rhs, cost(s, u)+uInfo.g);
+                        info.rhs = Math.Min(info.rhs, cost(s, u) + uInfo.g);
                         updateVertex(s);
                     }
                 }
@@ -157,7 +155,7 @@ namespace DStarLite
                         StateInfo info = S[s];
                         if (info.rhs == cost(s, u) + g_old)
                         {
-                            if(u.x != goal.x && u.y != goal.y)
+                            if (u.x != goal.x && u.y != goal.y)
                             {
                                 List<State> list = Succ(s);
                                 if (tempList.Any())
@@ -218,16 +216,56 @@ namespace DStarLite
                 }
                 Console.WriteLine(start.x + " " + start.y);
                 // For simulation and testing.
-                if (h == 1)
+                if (h == 0)
                 {
-                    updateCost(2, 2, double.PositiveInfinity);
+                    updateCost(2, 2, 0);
                     h++;
                 }
                 if (change)
                 {
                     k_m = k_m + heuristics(last, start);
                     last = start;
-                    changeNeighbors();                    
+                    List<State> list = changeNeighbors();
+                    double c_old;
+                    double c_new;
+                    StateInfo changedInfo = S[changed];
+                    double cc_old = changedInfo.cost;
+                    double cc_new = changedInfo.cost_new;
+                    changedInfo.cost = changedInfo.cost_new;
+                    foreach (State s in list)
+                    {
+                        StateInfo info = S[s];
+                        c_old = cost_new(s, cc_old);
+                        c_new = cost_new(s, cc_new);
+
+                        if (c_old > c_new)
+                        {
+                            info.rhs = Math.Min(info.rhs, c_new + info.g);
+                        }
+                        else if (info.rhs == c_old + info.g)
+                        {
+                            if (changed.x != goal.x && changed.y != goal.y)
+                            {
+                                List<State> list2 = Succ(s);
+                                if (list2.Any())
+                                {
+                                    State smallest = list2[0];
+                                    StateInfo smallInfo = S[smallest];
+                                    foreach (State ss in list2)
+                                    {
+                                        StateInfo ssInfo = S[ss];
+                                        if (cost(s, ss) + ssInfo.g < cost(s, smallest) + smallInfo.g)
+                                        {
+                                            smallest = ss;
+                                            smallInfo = ssInfo;
+                                        }
+                                    }
+                                    info.rhs = smallInfo.g + cost(s, smallest);
+                                }
+                            }
+                        }
+                        updateVertex(s);
+                    }
                     change = false;
                     computerShotestPath();
                 }
@@ -375,8 +413,9 @@ namespace DStarLite
         /// <summary>
         /// WIP
         /// </summary>
-        public void changeNeighbors()
+        public List<State> changeNeighbors()
         {
+            List<State> tempList = new List<State>();
             StateInfo sInfo = S[changed];
             for (int i = 0; i < 8; i++)
             {
@@ -384,9 +423,10 @@ namespace DStarLite
 
                 if (S.ContainsKey(temp))
                 {
-                        updateVertex(temp);
+                    tempList.Add(temp);
                 }
             }
+            return tempList;
         }
 
         /// <summary>
@@ -397,7 +437,16 @@ namespace DStarLite
         /// <returns>The cost, double.</returns>
         double cost(State a, State b)
         {
-            return Math.Max(a.cost, b.cost);
+
+            StateInfo aInfo = S[a];
+            StateInfo bInfo = S[b];
+            return Math.Max(aInfo.cost, bInfo.cost);
+
+        }
+        double cost_new(State a, double cost)
+        {
+            StateInfo aInfo = S[a];
+            return Math.Max(aInfo.cost, cost);
         }
 
 
