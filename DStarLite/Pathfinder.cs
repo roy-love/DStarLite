@@ -16,6 +16,7 @@ namespace DStarLite
         State topState;
         int k_m = 0;
         int maxsteps = 8000;
+        List<State> changed = new List<State>();
         double m_sqrt2 = Math.Sqrt(2.0);
         int[,] directions = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 } };
 
@@ -45,6 +46,19 @@ namespace DStarLite
             if (S2.ContainsKey(temp))
             {
                 goal = temp;
+            }
+        }
+
+        public void updateCost(int x, int y, double cost)
+        {
+            State temp = new State(x, y);
+            if (S2.ContainsKey(temp))
+            {
+                temp.cost = cost;
+                StateInfo tempInfo = new StateInfo();
+                S2.Remove(temp);
+                S2.Add(temp, tempInfo);
+                changed.Add(temp);
             }
         }
 
@@ -150,6 +164,12 @@ namespace DStarLite
             Console.WriteLine(start.x + " " + start.y);
             while (start.x != goal.x && start.y != goal.y)
             {
+                StateInfo startInfo = S2[start];
+                if(startInfo.g == double.PositiveInfinity)
+                {
+                    Console.WriteLine("No path found.");
+                    return;
+                }
                 List<State> tempList = Succ(start);
                 if (tempList.Any())
                 {
@@ -165,6 +185,19 @@ namespace DStarLite
                         }
                     }
                     start = smallest;
+                }
+                if (changed.Any()) 
+                {
+                    foreach(State s in changed)
+                    {
+                        updateVertex(s);
+                    }
+                    foreach(State s in U)
+                    {
+                        StateInfo sInfo = S2[s];
+                        sInfo.keys = calcKeys(s);
+                    }
+                    computerShotestPath();
                 }
                 
                 Console.WriteLine(start.x + " " + start.y);
