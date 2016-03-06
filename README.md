@@ -12,5 +12,5 @@ To-Do:
 - [x] Finish implementing.
 - [ ] Implement the second optimized version.
 - [ ] Comment.
-- [ ] Implement in Java.
+- [ ] Implement in Python.
 - [ ] More information to be revealed later.
