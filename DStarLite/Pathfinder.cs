@@ -411,7 +411,7 @@ namespace DStarLite
             return tempList;
         }
         /// <summary>
-        /// WIP
+        /// Gets adjacent states to the State instance 'changed'.
         /// </summary>
         public List<State> changeNeighbors()
         {
