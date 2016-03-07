@@ -8,10 +8,78 @@ namespace DStarLite
 {
     class StateInfo
     {
-        public double[] keys = { double.PositiveInfinity, double.PositiveInfinity };
-        public double g = double.PositiveInfinity;
-        public double rhs = double.PositiveInfinity;
-        public double cost = 1;
-        public double cost_new;
+        /// <summary>
+        /// As per [S. Koenig, 2002]
+        /// </summary>
+        private double[] keys = { double.PositiveInfinity, double.PositiveInfinity };
+        private double g = double.PositiveInfinity;
+        private double rhs = double.PositiveInfinity;
+        private double cost = 1;
+        private double cost_new;
+
+        public double[] Keys
+        {
+            get
+            {
+                return keys;
+            }
+
+            set
+            {
+                keys = value;
+            }
+        }
+
+        public double G
+        {
+            get
+            {
+                return g;
+            }
+
+            set
+            {
+                g = value;
+            }
+        }
+
+        public double Rhs
+        {
+            get
+            {
+                return rhs;
+            }
+
+            set
+            {
+                rhs = value;
+            }
+        }
+
+        public double Cost
+        {
+            get
+            {
+                return cost;
+            }
+
+            set
+            {
+                cost = value;
+            }
+        }
+
+        public double Cost_new
+        {
+            get
+            {
+                return cost_new;
+            }
+
+            set
+            {
+                cost_new = value;
+            }
+        }
     }
 }

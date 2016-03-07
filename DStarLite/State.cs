@@ -8,9 +8,9 @@ namespace DStarLite
 {
     class State
     {
-        public int x;
-        public int y;
-        
+        private int x;
+        private int y;
+
         /// <summary>
         /// The state is a combination of this class and StateInfo.
         /// </summary>
@@ -18,8 +18,34 @@ namespace DStarLite
         /// <param name="y">The y coordinate.</param>
         public State(int x, int y)
         {
-            this.x = x;
-            this.y = y;
+            this.X = x;
+            this.Y = y;
+        }
+
+        public int X
+        {
+            get
+            {
+                return x;
+            }
+
+            set
+            {
+                x = value;
+            }
+        }
+
+        public int Y
+        {
+            get
+            {
+                return y;
+            }
+
+            set
+            {
+                y = value;
+            }
         }
 
         public override bool Equals(object obj)
@@ -33,14 +59,14 @@ namespace DStarLite
             {
                 return false;
             }
-            return (x == item.x && y == item.y);
+            return (X == item.X && Y == item.Y);
         }
 
         public override int GetHashCode()
         {
             int hash = 3;
-            hash = 79 * hash + this.x;
-            hash = 79 * hash + this.y;
+            hash = 79 * hash + this.X;
+            hash = 79 * hash + this.Y;
             return hash;
         }
     }
