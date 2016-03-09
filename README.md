@@ -7,7 +7,7 @@ Language: **C#**
 License: **MIT**, feel free to use in your products.
 
 ####Current State:
-**Second** (*optimized*) version, operational. **Warning:** I did not implement a priority queue, you will have to do that yourself. Also, tweaking will probably be required to be used in a real environment. Nevertheless, the code works, and is sufficiently good for *educational purposes*.
+**Second** (*optimized*) version, operational. Tweaking will probably be required to be used in a real environment. Nevertheless, the code works, and is sufficiently good for *educational purposes*.
 
 ####Thoughts:
 
