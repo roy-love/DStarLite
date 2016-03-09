@@ -12,7 +12,6 @@ namespace DStarLite
         Dictionary<State, StateInfo> S = new Dictionary<State, StateInfo>();
         State start;
         State goal;
-        State u;
         double k_m = 0;
         int maxsteps = 8000;
         int steps = 0;
@@ -104,7 +103,7 @@ namespace DStarLite
             else if (uInfo.G != uInfo.Rhs && !U.Contains(u))
             {
                 uInfo.Keys = calcKeys(u);
-                U.Add(u);
+                add(u);
             }
             else if (uInfo.G != uInfo.Rhs && U.Contains(u))
             {
@@ -117,9 +116,10 @@ namespace DStarLite
         public void computerShotestPath()
         {
             StateInfo sInfo = S[start];
-            while ((U.Any() && keyLessThan(top(), start) || sInfo.Rhs != sInfo.G) && steps < maxsteps)
+            while ((U.Any() && keyLessThan(U.First(), start) || sInfo.Rhs != sInfo.G) && steps < maxsteps)
             {
                 steps++;
+                State u = U.First();
                 StateInfo uInfo = S[u];
                 double[] k_old = uInfo.Keys;
                 double[] k_new = calcKeys(u);
@@ -337,23 +337,6 @@ namespace DStarLite
             return ((m_sqrt2 - 1.0) * min + max);
         }
         /// <summary>
-        /// Gets the state with the highest priority ('till I implement an actual priority queue).
-        /// </summary>
-        /// <returns>State, highest priority in U.</returns>
-        State top()
-        {
-            State temp = U[0];
-            foreach (State s in U)
-            {
-                if (keyLessThan(s, temp))
-                {
-                    temp = s;
-                }
-            }
-            u = temp;
-            return temp;
-        }
-        /// <summary>
         /// Gets the predecessors of a state s.
         /// </summary>
         /// <param name="s">The state.</param>
@@ -442,6 +425,26 @@ namespace DStarLite
         {
             StateInfo aInfo = S[a];
             return Math.Max(aInfo.Cost, cost);
+        }
+        public void add(State state)
+        {
+            if (U.Any())
+            {
+                for (int i = 0; i < U.Count; i++)
+                {
+                    State ss = U[i];
+
+                    if (keyLessThan(state, ss))
+                    {
+
+                        U.Insert(i, state);
+                        return;
+                    }
+                }
+            }
+            else {
+                U.Add(state);
+            }
         }
 
 
