@@ -4,6 +4,8 @@ D*Lite, as explained in [this paper](http://pub1.willowgarage.com/~konolige/cs22
 
 Language: **C#**
 
+[In Java.](https://github.com/SorcerersApprentice/DStarLiteJava)
+
 License: **MIT**, feel free to use in your products.
 
 ####Current State:
