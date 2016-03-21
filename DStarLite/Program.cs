@@ -11,7 +11,7 @@ namespace DStarLite
         static void Main(string[] args)
         {
             Pathfinder pf = new Pathfinder();
-            pf.setGrid(4, 4);
+            pf.setGrid(10, 10);
             pf.setStart(0, 0);
             pf.setGoal(3, 3);
             pf.main();

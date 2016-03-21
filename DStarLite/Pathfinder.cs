@@ -183,9 +183,9 @@ namespace DStarLite
             State last = start;
             initialize();
             computerShotestPath();
-            //int h = 0;
+            int h = 0;
             Console.WriteLine(start.X + " " + start.Y);
-            while (start.X != goal.X && start.Y != goal.Y)
+            while (start.X != goal.X || start.Y != goal.Y)
             {
                 StateInfo startInfo = S[start];
                 if (startInfo.G == double.PositiveInfinity)
@@ -210,12 +210,12 @@ namespace DStarLite
                     start = smallest;
                 }
                 Console.WriteLine(start.X + " " + start.Y);
-                // For simulation and testing.
-                /*if (h == 0)
+                //For simulation and testing.
+                if (h == 0)
                 {
                     updateCost(2, 2, 3);
                     h++;
-                }*/
+                }
                 if (change)
                 {
                     k_m = k_m + heuristics(last, start);
