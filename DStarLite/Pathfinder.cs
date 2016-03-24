@@ -81,6 +81,7 @@ namespace DStarLite
             foreach (var s in S)
             {
                 s.Value.Rhs = s.Value.G = double.PositiveInfinity;
+                s.Value.Keys = new double[] { double.PositiveInfinity, double.PositiveInfinity };
             }
             StateInfo gInfo = S[goal];
             gInfo.Rhs = 0;

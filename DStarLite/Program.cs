@@ -15,6 +15,9 @@ namespace DStarLite
             pf.setStart(0, 0);
             pf.setGoal(3, 3);
             pf.main();
+            pf.setStart(3, 3);
+            pf.setGoal(0, 0);
+            pf.main();
             
         }
     }
