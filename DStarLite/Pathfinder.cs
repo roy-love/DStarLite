@@ -437,11 +437,11 @@ namespace DStarLite
 
                     if (keyLessThan(state, ss))
                     {
-
                         U.Insert(i, state);
                         return;
                     }
                 }
+                U.Insert(U.Count, state);
             }
             else {
                 U.Add(state);
