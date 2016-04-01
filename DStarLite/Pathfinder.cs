@@ -151,14 +151,14 @@ namespace DStarLite
                         StateInfo info = S[s];
                         if (info.Rhs == cost(s, u) + g_old)
                         {
-                            if (u.X != goal.X && u.Y != goal.Y)
+                            if (s.X != goal.X && s.Y != goal.Y)
                             {
                                 List<State> list = Succ(s);
-                                if (tempList.Any())
+                                if (list.Any())
                                 {
-                                    State smallest = tempList[0];
+                                    State smallest = list[0];
                                     StateInfo smallInfo = S[smallest];
-                                    foreach (State ss in tempList)
+                                    foreach (State ss in list)
                                     {
                                         StateInfo ssInfo = S[ss];
                                         if (cost(s, ss) + ssInfo.G < cost(s, smallest) + smallInfo.G)
