@@ -395,7 +395,7 @@ namespace DStarLite
         public List<State> changeNeighbors()
         {
             List<State> tempList = new List<State>();
-            //StateInfo sInfo = S[changed];
+            StateInfo sInfo = S[changed];
             for (int i = 0; i < 8; i++)
             {
                 State temp = new State(changed.X + directions[i, 0], changed.Y + directions[i, 1]);
