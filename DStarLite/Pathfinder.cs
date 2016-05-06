@@ -16,7 +16,7 @@ namespace DStarLite
         int maxsteps = 8000;
         int steps = 0;
         bool change = false;
-        State changed;
+        List<State> changes = new List<State>();
         double m_sqrt2 = Math.Sqrt(2.0);
         int[,] directions = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 } };
 
@@ -51,13 +51,21 @@ namespace DStarLite
 
         public void updateCost(int x, int y, double cost)
         {
-            changed = new State(x, y);
+            State temp = new State(x, y);
 
-            if (S.ContainsKey(changed))
+            if (S.ContainsKey(temp))
             {
-                StateInfo cInfo = S[changed];
-                cInfo.Cost_new = cost;
-                change = true;
+                StateInfo cInfo = S[temp];
+                if (steps != 0)
+                {
+                    cInfo.Cost_new = cost;
+                    change = true;
+                    changes.Add(temp);
+                }
+                else
+                {
+                    cInfo.Cost = cost;
+                }
             }
         }
         /// <summary>
@@ -219,30 +227,22 @@ namespace DStarLite
                 }
                 if (change)
                 {
+                    foreach (State temp in changes) {
                     k_m = k_m + heuristics(last, start);
                     last = start;
-                    List<State> list = changeNeighbors();
-                    double c_old;
-                    double c_new;
-                    StateInfo changedInfo = S[changed];
+                    StateInfo changedInfo = S[temp];
                     double cc_old = changedInfo.Cost;
                     double cc_new = changedInfo.Cost_new;
                     changedInfo.Cost = changedInfo.Cost_new;
-                    foreach (State s in list)
-                    {
-                        StateInfo info = S[s];
-                        c_old = cost_new(s, cc_old);
-                        c_new = cost_new(s, cc_new);
-
-                        if (c_old > c_new)
+                        if (cc_old > cc_new)
                         {
-                            info.Rhs = Math.Min(info.Rhs, c_new + changedInfo.G);
+                            changedInfo.Rhs = Math.Min(changedInfo.Rhs, cc_new + changedInfo.G);
                         }
-                        else if (info.Rhs == c_old + changedInfo.G)
+                        else if (changedInfo.Rhs == cc_old + changedInfo.G)
                         {
-                            if (s.X != goal.X && s.Y != goal.Y)
+                            if (temp.X != goal.X && temp.Y != goal.Y)
                             {
-                                List<State> list2 = Succ(s);
+                                List<State> list2 = Succ(temp);
                                 if (list2.Any())
                                 {
                                     State smallest = list2[0];
@@ -250,17 +250,17 @@ namespace DStarLite
                                     foreach (State ss in list2)
                                     {
                                         StateInfo ssInfo = S[ss];
-                                        if (cost(s, ss) + ssInfo.G < cost(s, smallest) + smallInfo.G)
+                                        if (cost(temp, ss) + ssInfo.G < cost(temp, smallest) + smallInfo.G)
                                         {
                                             smallest = ss;
                                             smallInfo = ssInfo;
                                         }
                                     }
-                                    info.Rhs = smallInfo.G + cost(s, smallest);
+                                    changedInfo.Rhs = smallInfo.G + cost(temp, smallest);
                                 }
                             }
                         }
-                        updateVertex(s);
+                        updateVertex(temp);
                     }
                     change = false;
                     computerShotestPath();
@@ -389,25 +389,6 @@ namespace DStarLite
             }
             return tempList;
         }
-        /// <summary>
-        /// Gets adjacent states to the State instance 'changed'.
-        /// </summary>
-        public List<State> changeNeighbors()
-        {
-            List<State> tempList = new List<State>();
-            StateInfo sInfo = S[changed];
-            for (int i = 0; i < 8; i++)
-            {
-                State temp = new State(changed.X + directions[i, 0], changed.Y + directions[i, 1]);
-
-                if (S.ContainsKey(temp))
-                {
-                    tempList.Add(temp);
-                }
-            }
-            return tempList;
-        }
-
         /// <summary>
         /// Gets the cost of traversal from one state to another adjacent state.
         /// </summary>
