@@ -328,7 +328,7 @@ namespace DStarLite
         {
             double temp;
             double min = Math.Abs(a.X - b.X);
-            double max = Math.Abs(a.Y - a.Y);
+            double max = Math.Abs(a.Y - b.Y);
             if (min > max)
             {
                 temp = min;
