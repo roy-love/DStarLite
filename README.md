@@ -1,6 +1,6 @@
 # DStarLite
 
-D*Lite, as explained in [this paper](http://pub1.willowgarage.com/~konolige/cs225b/dlite_tro05.pdf).
+D*Lite, as explained in [this paper](https://github.com/SorcerersApprentice/DStarLite/blob/master/dlite_tro05.pdf).
 
 Language: **C#**
 
