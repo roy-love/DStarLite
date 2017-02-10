@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DStarLite
+﻿namespace DStarLite
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Pathfinder pf = new Pathfinder();
-            pf.setGrid(10, 10);
+            pf.SetGrid(10, 10);
             //pf.setStart(0, 0);
             //pf.setGoal(3, 3);
             //pf.main();
-            pf.setStart(3, 3);
-            pf.setGoal(0, 0);
-            pf.main();
+            pf.SetStart(3, 3);
+            pf.SetGoal(0, 0);
+            pf.Main();
             
         }
     }

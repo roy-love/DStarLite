@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DStarLite
+﻿namespace DStarLite
 {
     class State
     {
-        private int x;
-        private int y;
+        private int _x;
+        private int _y;
 
         /// <summary>
         /// The state is a combination of this class and StateInfo.
@@ -18,20 +12,20 @@ namespace DStarLite
         /// <param name="y">The y coordinate.</param>
         public State(int x, int y)
         {
-            this.X = x;
-            this.Y = y;
+            X = x;
+            Y = y;
         }
 
         public int X
         {
             get
             {
-                return x;
+                return _x;
             }
 
             set
             {
-                x = value;
+                _x = value;
             }
         }
 
@@ -39,12 +33,12 @@ namespace DStarLite
         {
             get
             {
-                return y;
+                return _y;
             }
 
             set
             {
-                y = value;
+                _y = value;
             }
         }
 
@@ -65,8 +59,8 @@ namespace DStarLite
         public override int GetHashCode()
         {
             int hash = 3;
-            hash = 79 * hash + this.X;
-            hash = 79 * hash + this.Y;
+            hash = 79 * hash + X;
+            hash = 79 * hash + Y;
             return hash;
         }
     }

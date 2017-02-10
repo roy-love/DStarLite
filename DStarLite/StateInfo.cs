@@ -1,32 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DStarLite
+﻿namespace DStarLite
 {
     class StateInfo
     {
         /// <summary>
         /// As per [S. Koenig, 2002]
         /// </summary>
-        private double[] keys = { double.PositiveInfinity, double.PositiveInfinity };
-        private double g = double.PositiveInfinity;
-        private double rhs = double.PositiveInfinity;
-        private double cost = 1;
-        private double cost_new;
+        private double[] _keys = { double.PositiveInfinity, double.PositiveInfinity };
+        private double _g = double.PositiveInfinity;
+        private double _rhs = double.PositiveInfinity;
+        private double _cost = 1;
+        private double _costNew;
 
         public double[] Keys
         {
             get
             {
-                return keys;
+                return _keys;
             }
 
             set
             {
-                keys = value;
+                _keys = value;
             }
         }
 
@@ -34,12 +28,12 @@ namespace DStarLite
         {
             get
             {
-                return g;
+                return _g;
             }
 
             set
             {
-                g = value;
+                _g = value;
             }
         }
 
@@ -47,12 +41,12 @@ namespace DStarLite
         {
             get
             {
-                return rhs;
+                return _rhs;
             }
 
             set
             {
-                rhs = value;
+                _rhs = value;
             }
         }
 
@@ -60,12 +54,12 @@ namespace DStarLite
         {
             get
             {
-                return cost;
+                return _cost;
             }
 
             set
             {
-                cost = value;
+                _cost = value;
             }
         }
 
@@ -73,12 +67,12 @@ namespace DStarLite
         {
             get
             {
-                return cost_new;
+                return _costNew;
             }
 
             set
             {
-                cost_new = value;
+                _costNew = value;
             }
         }
     }

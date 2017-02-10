@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DStarLite
 {
@@ -10,17 +8,17 @@ namespace DStarLite
     {
         List<State> U = new List<State>();
         Dictionary<State, StateInfo> S = new Dictionary<State, StateInfo>();
-        State start;
-        State goal;
-        double k_m = 0;
-        int maxsteps = 8000;
-        int steps = 0;
-        bool change = false;
+        private State _start;
+        State _goal;
+        private double _kM;
+        readonly int _maxsteps = 8000;
+        private int _steps;
+        private bool _change;
         List<State> changes = new List<State>();
         double m_sqrt2 = Math.Sqrt(2.0);
         int[,] directions = { { 0, -1 }, { 1, 0 }, { 0, 1 }, { -1, 0 }, { -1, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 } };
 
-        public void setGrid(int x, int y)
+        public void SetGrid(int x, int y)
         {
             for (int i = 0; i < x; i++)
             {
@@ -31,35 +29,35 @@ namespace DStarLite
             }
         }
 
-        public void setStart(int x, int y)
+        public void SetStart(int x, int y)
         {
             State temp = new State(x, y);
             if (S.ContainsKey(temp))
             {
-                start = temp;
+                _start = temp;
             }
         }
 
-        public void setGoal(int x, int y)
+        public void SetGoal(int x, int y)
         {
             State temp = new State(x, y);
             if (S.ContainsKey(temp))
             {
-                goal = temp;
+                _goal = temp;
             }
         }
 
-        public void updateCost(int x, int y, double cost)
+        public void UpdateCost(int x, int y, double cost)
         {
             State temp = new State(x, y);
 
             if (S.ContainsKey(temp))
             {
                 StateInfo cInfo = S[temp];
-                if (steps != 0)
+                if (_steps != 0)
                 {
                     cInfo.Cost_new = cost;
-                    change = true;
+                    _change = true;
                     changes.Add(temp);
                 }
                 else
@@ -71,48 +69,48 @@ namespace DStarLite
         /// <summary>
         /// As per [S. Koenig, 2002]
         /// </summary>
-        public double[] calcKeys(State s)
+        public double[] CalcKeys(State s)
         {
             double[] temp = new double[2];
             StateInfo sInfo = S[s];
-            temp[0] = Math.Min(sInfo.G, sInfo.Rhs) + heuristics(start, s) + k_m;
+            temp[0] = Math.Min(sInfo.G, sInfo.Rhs) + Heuristics(_start, s) + _kM;
             temp[1] = Math.Min(sInfo.G, sInfo.Rhs);
             return temp;
         }
         /// <summary>
         /// As per [S. Koenig, 2002]
         /// </summary>
-        public void initialize()
+        public void Initialize()
         {
             U.Clear();
-            k_m = 0;
+            _kM = 0;
             foreach (var s in S)
             {
                 s.Value.Rhs = s.Value.G = double.PositiveInfinity;
-                s.Value.Keys = new double[] { double.PositiveInfinity, double.PositiveInfinity };
+                s.Value.Keys = new[] { double.PositiveInfinity, double.PositiveInfinity };
             }
-            StateInfo gInfo = S[goal];
+            StateInfo gInfo = S[_goal];
             gInfo.Rhs = 0;
-            gInfo.Keys[0] = heuristics(start, goal);
+            gInfo.Keys[0] = Heuristics(_start, _goal);
             gInfo.Keys[1] = 0;
-            U.Add(goal);
-            steps = 0;
+            U.Add(_goal);
+            _steps = 0;
 
         }
         /// <summary>
         /// As per [S. Koenig, 2002]
         /// </summary>
-        public void updateVertex(State u)
+        public void UpdateVertex(State u)
         {
             StateInfo uInfo = S[u];
             if (uInfo.G != uInfo.Rhs && U.Contains(u))
             {
-                uInfo.Keys = calcKeys(u);
+                uInfo.Keys = CalcKeys(u);
             }
             else if (uInfo.G != uInfo.Rhs && !U.Contains(u))
             {
-                uInfo.Keys = calcKeys(u);
-                add(u);
+                uInfo.Keys = CalcKeys(u);
+                Add(u);
             }
             else if (uInfo.G != uInfo.Rhs && U.Contains(u))
             {
@@ -122,19 +120,19 @@ namespace DStarLite
         /// <summary>
         /// As per [S. Koenig, 2002], with one modification, maxsteps, because the code can loop forever otherwise.
         /// </summary>
-        public void computerShotestPath()
+        public void ComputerShotestPath()
         {
-            StateInfo sInfo = S[start];
-            while ((U.Any() && keyLessThan(U.First(), start) || sInfo.Rhs != sInfo.G) && steps < maxsteps)
+            StateInfo sInfo = S[_start];
+            while ((U.Any() && KeyLessThan(U.First(), _start) || sInfo.Rhs != sInfo.G) && _steps < _maxsteps)
             {
-                steps++;
+                _steps++;
                 State u = U.First();
                 StateInfo uInfo = S[u];
-                double[] k_old = uInfo.Keys;
-                double[] k_new = calcKeys(u);
-                if (keyLessThan(k_old, k_new))
+                double[] kOld = uInfo.Keys;
+                double[] kNew = CalcKeys(u);
+                if (KeyLessThan(kOld, kNew))
                 {
-                    uInfo.Keys = k_new;
+                    uInfo.Keys = kNew;
                 }
                 else if (uInfo.G > uInfo.Rhs)
                 {
@@ -144,22 +142,22 @@ namespace DStarLite
                     foreach (State s in tempList)
                     {
                         StateInfo info = S[s];
-                        info.Rhs = Math.Min(info.Rhs, cost(s, u) + uInfo.G);
-                        updateVertex(s);
+                        info.Rhs = Math.Min(info.Rhs, Cost(s, u) + uInfo.G);
+                        UpdateVertex(s);
                     }
                 }
                 else
                 {
-                    double g_old = uInfo.G;
+                    double gOld = uInfo.G;
                     uInfo.G = double.PositiveInfinity;
                     List<State> tempList = Pred(u);
                     tempList.Add(u);
                     foreach (State s in tempList)
                     {
                         StateInfo info = S[s];
-                        if (info.Rhs == cost(s, u) + g_old)
+                        if (info.Rhs == Cost(s, u) + gOld)
                         {
-                            if (s.X != goal.X && s.Y != goal.Y)
+                            if (s.X != _goal.X && s.Y != _goal.Y)
                             {
                                 List<State> list = Succ(s);
                                 if (list.Any())
@@ -169,17 +167,17 @@ namespace DStarLite
                                     foreach (State ss in list)
                                     {
                                         StateInfo ssInfo = S[ss];
-                                        if (cost(s, ss) + ssInfo.G < cost(s, smallest) + smallInfo.G)
+                                        if (Cost(s, ss) + ssInfo.G < Cost(s, smallest) + smallInfo.G)
                                         {
                                             smallest = ss;
                                             smallInfo = ssInfo;
                                         }
                                     }
-                                    info.Rhs = smallInfo.G + cost(s, smallest);
+                                    info.Rhs = smallInfo.G + Cost(s, smallest);
                                 }
                             }
                         }
-                        updateVertex(s);
+                        UpdateVertex(s);
                     }
                 }
             }
@@ -187,22 +185,22 @@ namespace DStarLite
         /// <summary>
         /// As per [S. Koenig, 2002]
         /// </summary>
-        public void main()
+        public void Main()
         {
-            State last = start;
-            initialize();
-            computerShotestPath();
+            State last = _start;
+            Initialize();
+            ComputerShotestPath();
             int h = 0;
-            Console.WriteLine(start.X + " " + start.Y);
-            while (start.X != goal.X || start.Y != goal.Y)
+            Console.WriteLine(_start.X + " " + _start.Y);
+            while (_start.X != _goal.X || _start.Y != _goal.Y)
             {
-                StateInfo startInfo = S[start];
+                StateInfo startInfo = S[_start];
                 if (startInfo.G == double.PositiveInfinity)
                 {
                     Console.WriteLine("No path found.");
                     return;
                 }
-                List<State> tempList = Succ(start);
+                List<State> tempList = Succ(_start);
                 if (tempList.Any())
                 {
                     State smallest = tempList[0];
@@ -210,37 +208,37 @@ namespace DStarLite
                     foreach (State s in tempList)
                     {
                         StateInfo sInfo = S[s];
-                        if (cost(start, s) + sInfo.G < cost(start, smallest) + smallInfo.G)
+                        if (Cost(_start, s) + sInfo.G < Cost(_start, smallest) + smallInfo.G)
                         {
                             smallest = s;
                             smallInfo = sInfo;
                         }
                     }
-                    start = smallest;
+                    _start = smallest;
                 }
-                Console.WriteLine(start.X + " " + start.Y);
+                Console.WriteLine(_start.X + " " + _start.Y);
                 //For simulation and testing.
                 if (h == 0)
                 {
-                    updateCost(2, 2, 3);
+                    UpdateCost(2, 2, 3);
                     h++;
                 }
-                if (change)
+                if (_change)
                 {
                     foreach (State temp in changes) {
-                    k_m = k_m + heuristics(last, start);
-                    last = start;
+                    _kM = _kM + Heuristics(last, _start);
+                    last = _start;
                     StateInfo changedInfo = S[temp];
-                    double cc_old = changedInfo.Cost;
-                    double cc_new = changedInfo.Cost_new;
+                    double ccOld = changedInfo.Cost;
+                    double ccNew = changedInfo.Cost_new;
                     changedInfo.Cost = changedInfo.Cost_new;
-                        if (cc_old > cc_new)
+                        if (ccOld > ccNew)
                         {
-                            changedInfo.Rhs = Math.Min(changedInfo.Rhs, cc_new + changedInfo.G);
+                            changedInfo.Rhs = Math.Min(changedInfo.Rhs, ccNew + changedInfo.G);
                         }
-                        else if (changedInfo.Rhs == cc_old + changedInfo.G)
+                        else if (changedInfo.Rhs == ccOld + changedInfo.G)
                         {
-                            if (temp.X != goal.X && temp.Y != goal.Y)
+                            if (temp.X != _goal.X && temp.Y != _goal.Y)
                             {
                                 List<State> list2 = Succ(temp);
                                 if (list2.Any())
@@ -250,20 +248,20 @@ namespace DStarLite
                                     foreach (State ss in list2)
                                     {
                                         StateInfo ssInfo = S[ss];
-                                        if (cost(temp, ss) + ssInfo.G < cost(temp, smallest) + smallInfo.G)
+                                        if (Cost(temp, ss) + ssInfo.G < Cost(temp, smallest) + smallInfo.G)
                                         {
                                             smallest = ss;
                                             smallInfo = ssInfo;
                                         }
                                     }
-                                    changedInfo.Rhs = smallInfo.G + cost(temp, smallest);
+                                    changedInfo.Rhs = smallInfo.G + Cost(temp, smallest);
                                 }
                             }
                         }
-                        updateVertex(temp);
+                        UpdateVertex(temp);
                     }
-                    change = false;
-                    computerShotestPath();
+                    _change = false;
+                    ComputerShotestPath();
                 }
 
 
@@ -276,7 +274,7 @@ namespace DStarLite
         /// <param name="a"> The first state.</param>
         /// <param name="b"> The second state.</param>
         /// <returns></returns>
-        bool keyLessThan(State a, State b)
+        private bool KeyLessThan(State a, State b)
         {
             StateInfo aInfo = S[a];
             StateInfo bInfo = S[b];
@@ -301,7 +299,7 @@ namespace DStarLite
         /// <param name="keyA">First pair.</param>
         /// <param name="keyB">Second pair.</param>
         /// <returns></returns>
-        bool keyLessThan(double[] keyA, double[] keyB)
+        bool KeyLessThan(double[] keyA, double[] keyB)
         {
             if (keyA[0] < keyB[0])
             {
@@ -324,7 +322,7 @@ namespace DStarLite
         /// <param name="a">The first state.</param>
         /// <param name="b">The second state.</param>
         /// <returns>Returns the heuristics value.</returns>
-        double heuristics(State a, State b)
+        private double Heuristics(State a, State b)
         {
             double temp;
             double min = Math.Abs(a.X - b.X);
@@ -395,7 +393,7 @@ namespace DStarLite
         /// <param name="a">First state.</param>
         /// <param name="b">Second state.</param>
         /// <returns>The cost, double.</returns>
-        double cost(State a, State b)
+        private double Cost(State a, State b)
         {
 
             StateInfo aInfo = S[a];
@@ -403,12 +401,8 @@ namespace DStarLite
             return Math.Max(aInfo.Cost, bInfo.Cost);
 
         }
-        double cost_new(State a, double cost)
-        {
-            StateInfo aInfo = S[a];
-            return Math.Max(aInfo.Cost, cost);
-        }
-        public void add(State state)
+
+        public void Add(State state)
         {
             if (U.Any())
             {
@@ -416,7 +410,7 @@ namespace DStarLite
                 {
                     State ss = U[i];
 
-                    if (keyLessThan(state, ss))
+                    if (KeyLessThan(state, ss))
                     {
                         U.Insert(i, state);
                         return;
