@@ -1,7 +1,7 @@
 # DStarLite
 
 D\*Lite, as explained in [this paper](https://github.com/SorcerersApprentice/DStarLite/blob/master/dlite_tro05.pdf).
-Also, [relevant wikipedia](https://en.wikipedia.org/wiki/D*).
+Also, [relevant wikipedia article](https://en.wikipedia.org/wiki/D*).
 
 Language: **C#**
 
