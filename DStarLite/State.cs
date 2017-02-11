@@ -1,10 +1,7 @@
 ﻿namespace DStarLite
 {
-    class State
+    internal class State
     {
-        private int _x;
-        private int _y;
-
         /// <summary>
         /// The state is a combination of this class and StateInfo.
         /// </summary>
@@ -16,31 +13,9 @@
             Y = y;
         }
 
-        public int X
-        {
-            get
-            {
-                return _x;
-            }
+        public int X { get; }
 
-            set
-            {
-                _x = value;
-            }
-        }
-
-        public int Y
-        {
-            get
-            {
-                return _y;
-            }
-
-            set
-            {
-                _y = value;
-            }
-        }
+        public int Y { get; }
 
         public override bool Equals(object obj)
         {
@@ -58,7 +33,7 @@
 
         public override int GetHashCode()
         {
-            int hash = 3;
+            var hash = 3;
             hash = 79 * hash + X;
             hash = 79 * hash + Y;
             return hash;
