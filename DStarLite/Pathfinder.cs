@@ -101,16 +101,16 @@ namespace DStarLite
         public void UpdateVertex(State u)
         {
             var uInfo = _s[u];
-            if (Math.Abs(uInfo.G - uInfo.Rhs) > float.Epsilon && _u.Contains(u))
+            if (Math.Abs(uInfo.G - uInfo.Rhs) > double.Epsilon && _u.Contains(u))
             {
                 uInfo.Keys = CalcKeys(u);
             }
-            else if (Math.Abs(uInfo.G - uInfo.Rhs) > float.Epsilon && !_u.Contains(u))
+            else if (Math.Abs(uInfo.G - uInfo.Rhs) > double.Epsilon && !_u.Contains(u))
             {
                 uInfo.Keys = CalcKeys(u);
                 Add(u);
             }
-            else if (Math.Abs(uInfo.G - uInfo.Rhs) > float.Epsilon && _u.Contains(u))
+            else if (Math.Abs(uInfo.G - uInfo.Rhs) > double.Epsilon && _u.Contains(u))
             {
                 _u.Remove(u);
             }
@@ -121,7 +121,7 @@ namespace DStarLite
         public void ComputerShotestPath()
         {
             var sInfo = _s[_start];
-            while ((_u.Any() && KeyLessThan(_u.First(), _start) || Math.Abs(sInfo.Rhs - sInfo.G) > float.Epsilon) && _steps < Maxsteps)
+            while ((_u.Any() && KeyLessThan(_u.First(), _start) || Math.Abs(sInfo.Rhs - sInfo.G) > double.Epsilon) && _steps < Maxsteps)
             {
                 _steps++;
                 var u = _u.First();
@@ -153,7 +153,7 @@ namespace DStarLite
                     foreach (var s in tempList)
                     {
                         var info = _s[s];
-                        if (Math.Abs(info.Rhs - (Cost(s, u) + gOld)) < float.Epsilon)
+                        if (Math.Abs(info.Rhs - (Cost(s, u) + gOld)) < double.Epsilon)
                         {
                             if (s.X != _goal.X && s.Y != _goal.Y)
                             {
@@ -210,13 +210,15 @@ namespace DStarLite
                     }
                     _start = smallest;
                 }
+                Console.WriteLine("Iterration: {0}", h);
                 Console.WriteLine(_start.X + " " + _start.Y);
                 //For simulation and testing.
                 if (h == 0)
                 {
-                    UpdateCost(2, 2, 3);
-                    h++;
+                    UpdateCost(1, 1, 1000);
+                    
                 }
+                h++;
                 if (!_change) continue;
                 {
                     foreach (var temp in _changes) {
@@ -230,7 +232,7 @@ namespace DStarLite
                         {
                             changedInfo.Rhs = Math.Min(changedInfo.Rhs, ccNew + changedInfo.G);
                         }
-                        else if (Math.Abs(changedInfo.Rhs - (ccOld + changedInfo.G)) < float.Epsilon)
+                        else if (Math.Abs(changedInfo.Rhs - (ccOld + changedInfo.G)) < double.Epsilon)
                         {
                             if (temp.X != _goal.X && temp.Y != _goal.Y)
                             {
@@ -273,7 +275,7 @@ namespace DStarLite
             {
                 return true;
             }
-            if (!(Math.Abs(aInfo.Keys[0] - bInfo.Keys[0]) < float.Epsilon)) return false;
+            if (!(Math.Abs(aInfo.Keys[0] - bInfo.Keys[0]) < double.Epsilon)) return false;
             return aInfo.Keys[1] < bInfo.Keys[1];
         }
         /// <summary>
@@ -288,7 +290,7 @@ namespace DStarLite
             {
                 return true;
             }
-            if (!(Math.Abs(keyA[0] - keyB[0]) < float.Epsilon)) return false;
+            if (!(Math.Abs(keyA[0] - keyB[0]) < double.Epsilon)) return false;
             return keyA[1] < keyB[1];
         }
 
