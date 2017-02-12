@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DStarLite
@@ -85,7 +86,7 @@ namespace DStarLite
             foreach (var s in _s)
             {
                 s.Value.Rhs = s.Value.G = double.PositiveInfinity;
-                s.Value.Keys = new[] { double.PositiveInfinity, double.PositiveInfinity };
+                s.Value.Keys = new[] { double.PositiveInfinity, double.PositiveInfinity }; // Hmm
             }
             var gInfo = _s[_goal];
             gInfo.Rhs = 0;
@@ -101,18 +102,19 @@ namespace DStarLite
         public void UpdateVertex(State u)
         {
             var uInfo = _s[u];
-            if (Math.Abs(uInfo.G - uInfo.Rhs) > double.Epsilon && _u.Contains(u))
+            if (!uInfo.G.Equals(uInfo.Rhs) && _u.Contains(u)) 
             {
                 uInfo.Keys = CalcKeys(u);
             }
-            else if (Math.Abs(uInfo.G - uInfo.Rhs) > double.Epsilon && !_u.Contains(u))
+            else if (!uInfo.G.Equals(uInfo.Rhs) && !_u.Contains(u))
             {
                 uInfo.Keys = CalcKeys(u);
                 Add(u);
             }
-            else if (Math.Abs(uInfo.G - uInfo.Rhs) > double.Epsilon && _u.Contains(u))
+            else if (uInfo.G.Equals(uInfo.Rhs) && _u.Contains(u))
             {
                 _u.Remove(u);
+
             }
         }
         /// <summary>
@@ -121,7 +123,7 @@ namespace DStarLite
         public void ComputerShotestPath()
         {
             var sInfo = _s[_start];
-            while ((_u.Any() && KeyLessThan(_u.First(), _start) || Math.Abs(sInfo.Rhs - sInfo.G) > double.Epsilon) && _steps < Maxsteps)
+            while ((_u.Any() && KeyLessThan(_u.First(), _start) || sInfo.Rhs > sInfo.G) && _steps < Maxsteps)
             {
                 _steps++;
                 var u = _u.First();
@@ -153,7 +155,7 @@ namespace DStarLite
                     foreach (var s in tempList)
                     {
                         var info = _s[s];
-                        if (Math.Abs(info.Rhs - (Cost(s, u) + gOld)) < double.Epsilon)
+                        if (info.Rhs.Equals(Cost(s, u) + gOld)) //
                         {
                             if (s.X != _goal.X && s.Y != _goal.Y)
                             {
@@ -191,7 +193,7 @@ namespace DStarLite
             while (_start.X != _goal.X || _start.Y != _goal.Y)
             {
                 var startInfo = _s[_start];
-                if (double.IsPositiveInfinity(startInfo.G))
+                if (double.IsPositiveInfinity(startInfo.Rhs))
                 {
                     Console.WriteLine("No path found.");
                     return;
@@ -215,44 +217,49 @@ namespace DStarLite
                 //For simulation and testing.
                 if (h == 0)
                 {
-                    UpdateCost(1, 1, 1000);
-                    
+                    //UpdateCost(1, 1, double.NegativeInfinity);
+                    //UpdateCost(0, 0, double.PositiveInfinity);
+
                 }
                 h++;
                 if (!_change) continue;
                 {
-                    foreach (var temp in _changes) {
-                        _kM = _kM + Heuristics(last, _start);
-                        last = _start;
-                        var changedInfo = _s[temp];
+                    _kM = _kM + Heuristics(last, _start);
+                    last = _start;
+                    foreach (var v in _changes) {
+                        var changedInfo = _s[v];
                         var ccOld = changedInfo.Cost;
-                        var ccNew = changedInfo.CostNew;
+                        //var ccNew = changedInfo.CostNew;
                         changedInfo.Cost = changedInfo.CostNew;
-                        if (ccOld > ccNew)
+                        foreach (var u in Pred(v))
                         {
-                            changedInfo.Rhs = Math.Min(changedInfo.Rhs, ccNew + changedInfo.G);
-                        }
-                        else if (Math.Abs(changedInfo.Rhs - (ccOld + changedInfo.G)) < double.Epsilon)
-                        {
-                            if (temp.X != _goal.X && temp.Y != _goal.Y)
+                            var uInfo = _s[u];
+                            if (ccOld > changedInfo.Cost)
                             {
-                                var list2 = Succ(temp);
-                                if (list2.Any())
+                                uInfo.Rhs = Math.Min(uInfo.Rhs, changedInfo.Cost + changedInfo.G); // Now, it's right
+                            }
+                            else if (uInfo.Rhs.Equals(ccOld+changedInfo.G))
+                            {
+                                if (u.X != _goal.X && u.Y != _goal.Y)
                                 {
-                                    var smallest = list2[0];
-                                    var smallInfo = _s[smallest];
-                                    foreach (var ss in list2)
+                                    var list2 = Succ(v);
+                                    if (list2.Any())
                                     {
-                                        var ssInfo = _s[ss];
-                                        if (!(Cost(temp, ss) + ssInfo.G < Cost(temp, smallest) + smallInfo.G)) continue;
-                                        smallest = ss;
-                                        smallInfo = ssInfo;
+                                        var smallest = list2[0];
+                                        var smallInfo = _s[smallest];
+                                        foreach (var ss in list2)
+                                        {
+                                            var ssInfo = _s[ss];
+                                            if (!(Cost(v, ss) + ssInfo.G < Cost(v, smallest) + smallInfo.G)) continue;
+                                            smallest = ss;
+                                            smallInfo = ssInfo;
+                                        }
+                                        uInfo.Rhs = smallInfo.G + Cost(v, smallest);
                                     }
-                                    changedInfo.Rhs = smallInfo.G + Cost(temp, smallest);
                                 }
                             }
+                            UpdateVertex(u);
                         }
-                        UpdateVertex(temp);
                     }
                     _change = false;
                     ComputerShotestPath();
@@ -275,7 +282,7 @@ namespace DStarLite
             {
                 return true;
             }
-            if (!(Math.Abs(aInfo.Keys[0] - bInfo.Keys[0]) < double.Epsilon)) return false;
+            if (!aInfo.Keys[0].Equals(bInfo.Keys[0])) return false;
             return aInfo.Keys[1] < bInfo.Keys[1];
         }
         /// <summary>
@@ -290,7 +297,7 @@ namespace DStarLite
             {
                 return true;
             }
-            if (!(Math.Abs(keyA[0] - keyB[0]) < double.Epsilon)) return false;
+            if (!keyA[0].Equals(keyB[0])) return false;
             return keyA[1] < keyB[1];
         }
 
@@ -365,7 +372,8 @@ namespace DStarLite
 
             var aInfo = _s[a];
             var bInfo = _s[b];
-            return Math.Max(aInfo.Cost, bInfo.Cost);
+            //return Math.Max(aInfo.Cost, bInfo.Cost);
+            return bInfo.Cost;
 
         }
 

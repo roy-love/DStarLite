@@ -13,7 +13,7 @@ namespace DStarLite
             //pf.main();
             pf.SetStart(3, 3);
             pf.SetGoal(0, 0);
-            pf.UpdateCost(1, 1, 1000);
+            //pf.UpdateCost(1, 1, 1000);
             pf.Main();
             Console.ReadLine();
         }
