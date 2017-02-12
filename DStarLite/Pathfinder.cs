@@ -86,7 +86,7 @@ namespace DStarLite
             foreach (var s in _s)
             {
                 s.Value.Rhs = s.Value.G = double.PositiveInfinity;
-                s.Value.Keys = new[] { double.PositiveInfinity, double.PositiveInfinity }; // Hmm
+                //s.Value.Keys = new[] { double.PositiveInfinity, double.PositiveInfinity }; // Hmm
             }
             var gInfo = _s[_goal];
             gInfo.Rhs = 0;
@@ -105,6 +105,8 @@ namespace DStarLite
             if (!uInfo.G.Equals(uInfo.Rhs) && _u.Contains(u)) 
             {
                 uInfo.Keys = CalcKeys(u);
+                _u.Remove(u);
+                Add(u);
             }
             else if (!uInfo.G.Equals(uInfo.Rhs) && !_u.Contains(u))
             {
@@ -122,8 +124,8 @@ namespace DStarLite
         /// </summary>
         public void ComputerShotestPath()
         {
-            var sInfo = _s[_start];
-            while ((_u.Any() && KeyLessThan(_u.First(), _start) || sInfo.Rhs > sInfo.G) && _steps < Maxsteps)
+            var startInfo = _s[_start];
+            while ((_u.Any() && KeyLessThan(_u.First(), _start) || startInfo.Rhs > startInfo.G) && _steps < Maxsteps)
             {
                 _steps++;
                 var u = _u.First();
@@ -133,16 +135,17 @@ namespace DStarLite
                 if (KeyLessThan(kOld, kNew))
                 {
                     uInfo.Keys = kNew;
+                    _u.Remove(u);
+                    Add(u);
                 }
                 else if (uInfo.G > uInfo.Rhs)
                 {
                     uInfo.G = uInfo.Rhs;
                     _u.Remove(u);
-                    var tempList = Pred(u);
-                    foreach (var s in tempList)
+                    foreach (var s in Pred(u))
                     {
-                        var info = _s[s];
-                        info.Rhs = Math.Min(info.Rhs, Cost(s, u) + uInfo.G);
+                        var sInfo = _s[s];
+                        sInfo.Rhs = Math.Min(sInfo.Rhs, Cost(s, u) + uInfo.G);
                         UpdateVertex(s);
                     }
                 }
@@ -154,8 +157,8 @@ namespace DStarLite
                     tempList.Add(u);
                     foreach (var s in tempList)
                     {
-                        var info = _s[s];
-                        if (info.Rhs.Equals(Cost(s, u) + gOld)) //
+                        var sInfo = _s[s];
+                        if (sInfo.Rhs.Equals(Cost(s, u) + gOld))
                         {
                             if (s.X != _goal.X && s.Y != _goal.Y)
                             {
@@ -164,14 +167,14 @@ namespace DStarLite
                                 {
                                     var smallest = list[0];
                                     var smallInfo = _s[smallest];
-                                    foreach (var ss in list)
+                                    foreach (var sPrime in list)
                                     {
-                                        var ssInfo = _s[ss];
-                                        if (!(Cost(s, ss) + ssInfo.G < Cost(s, smallest) + smallInfo.G)) continue;
-                                        smallest = ss;
-                                        smallInfo = ssInfo;
+                                        var sPrimeInfo = _s[sPrime];
+                                        if (!(Cost(s, sPrime) + sPrimeInfo.G < Cost(s, smallest) + smallInfo.G)) continue;
+                                        smallest = sPrime;
+                                        smallInfo = sPrimeInfo;
                                     }
-                                    info.Rhs = smallInfo.G + Cost(s, smallest);
+                                    sInfo.Rhs = smallInfo.G + Cost(s, smallest);
                                 }
                             }
                         }
@@ -214,12 +217,10 @@ namespace DStarLite
                 }
                 Console.WriteLine("Iterration: {0}", h);
                 Console.WriteLine(_start.X + " " + _start.Y);
-                //For simulation and testing.
+                //We scan for changes HERE.
                 if (h == 0)
                 {
-                    //UpdateCost(1, 1, double.NegativeInfinity);
-                    //UpdateCost(0, 0, double.PositiveInfinity);
-
+                    UpdateCost(1, 1, 1000);
                 }
                 h++;
                 if (!_change) continue;
@@ -260,6 +261,7 @@ namespace DStarLite
                             }
                             UpdateVertex(u);
                         }
+                        //UpdateVertex(v);
                     }
                     _change = false;
                     ComputerShotestPath();
@@ -370,7 +372,7 @@ namespace DStarLite
         private double Cost(State a, State b)
         {
 
-            var aInfo = _s[a];
+            //var aInfo = _s[a];
             var bInfo = _s[b];
             //return Math.Max(aInfo.Cost, bInfo.Cost);
             return bInfo.Cost;
