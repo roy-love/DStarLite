@@ -229,17 +229,17 @@ namespace DStarLite
                     last = _start;
                     foreach (var v in _changes) {
                         var changedInfo = _s[v];
-                        var ccOld = changedInfo.Cost;
+                        var cOld = changedInfo.Cost;
                         //var ccNew = changedInfo.CostNew;
                         changedInfo.Cost = changedInfo.CostNew;
                         foreach (var u in Pred(v))
                         {
                             var uInfo = _s[u];
-                            if (ccOld > changedInfo.Cost)
+                            if (cOld > changedInfo.Cost)
                             {
                                 uInfo.Rhs = Math.Min(uInfo.Rhs, changedInfo.Cost + changedInfo.G); // Now, it's right
                             }
-                            else if (uInfo.Rhs.Equals(ccOld+changedInfo.G))
+                            else if (uInfo.Rhs.Equals(cOld+changedInfo.G))
                             {
                                 if (u.X != _goal.X && u.Y != _goal.Y)
                                 {
@@ -263,6 +263,7 @@ namespace DStarLite
                         }
                         //UpdateVertex(v);
                     }
+                    _changes.Clear();
                     _change = false;
                     ComputerShotestPath();
                 }
