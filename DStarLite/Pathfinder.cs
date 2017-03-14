@@ -230,38 +230,32 @@ namespace DStarLite
                     foreach (var v in _changes) {
                         var changedInfo = _s[v];
                         var cOld = changedInfo.Cost;
-                        //var ccNew = changedInfo.CostNew;
                         changedInfo.Cost = changedInfo.CostNew;
-                        foreach (var u in Pred(v))
+                        if (cOld > changedInfo.Cost)
                         {
-                            var uInfo = _s[u];
-                            if (cOld > changedInfo.Cost)
+                            changedInfo.Rhs = Math.Min(changedInfo.Rhs, changedInfo.Cost + changedInfo.G);
+                        }
+                        else if (changedInfo.Rhs.Equals(cOld + changedInfo.G))
+                        {
+                            if (v.X != _goal.X && v.Y != _goal.Y)
                             {
-                                uInfo.Rhs = Math.Min(uInfo.Rhs, changedInfo.Cost + changedInfo.G); // Now, it's right
-                            }
-                            else if (uInfo.Rhs.Equals(cOld+changedInfo.G))
-                            {
-                                if (u.X != _goal.X && u.Y != _goal.Y)
+                                var list2 = Succ(v);
+                                if (list2.Any())
                                 {
-                                    var list2 = Succ(v);
-                                    if (list2.Any())
+                                    var smallest = list2[0];
+                                    var smallInfo = _s[smallest];
+                                    foreach (var ss in list2)
                                     {
-                                        var smallest = list2[0];
-                                        var smallInfo = _s[smallest];
-                                        foreach (var ss in list2)
-                                        {
-                                            var ssInfo = _s[ss];
-                                            if (!(Cost(v, ss) + ssInfo.G < Cost(v, smallest) + smallInfo.G)) continue;
-                                            smallest = ss;
-                                            smallInfo = ssInfo;
-                                        }
-                                        uInfo.Rhs = smallInfo.G + Cost(v, smallest);
+                                        var ssInfo = _s[ss];
+                                        if (!(Cost(v, ss) + ssInfo.G < Cost(v, smallest) + smallInfo.G)) continue;
+                                        smallest = ss;
+                                        smallInfo = ssInfo;
                                     }
+                                    changedInfo.Rhs = smallInfo.G + Cost(v, smallest);
                                 }
                             }
-                            UpdateVertex(u);
                         }
-                        //UpdateVertex(v);
+                        UpdateVertex(v);
                     }
                     _changes.Clear();
                     _change = false;
